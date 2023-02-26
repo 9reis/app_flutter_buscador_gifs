@@ -93,6 +93,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
-    return null;
+    return GridView.builder(
+      padding: EdgeInsets.all(10),
+      // Como os itens serão organizados na tela
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10, //Espaço Horizontal entre os itens
+        mainAxisSpacing: 10, // Espaço Vertical entre os itens
+      ),
+      itemCount: snapshot.data['data'].length,
+      // Func que cria cada item do grid
+      itemBuilder: (context, index) {
+        //Permite clicar no item
+        return GestureDetector(
+          child: Image.network(
+            snapshot.data['data'][index]['images']['fixed_height']['url'],
+            height: 300,
+            fit: BoxFit.cover,
+          ),
+        );
+      },
+    );
   }
 }
