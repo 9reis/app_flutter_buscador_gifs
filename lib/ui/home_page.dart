@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
       ),
       backgroundColor: Colors.black,
       body: Column(
-        children: const [
+        children: [
           Padding(
             padding: EdgeInsets.all(10),
             child: TextField(
@@ -62,9 +62,37 @@ class _HomePageState extends State<HomePage> {
               ),
               textAlign: TextAlign.center,
             ),
-          )
+          ),
+          Expanded(
+              child: FutureBuilder(
+                  future: _getGifs(),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                      case ConnectionState.none:
+                        return Container(
+                          width: 200,
+                          height: 200,
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 5,
+                          ),
+                        );
+                      default:
+                        if (snapshot.hasError)
+                          return Container();
+                        else
+                          _createGifTable(context, snapshot);
+                    }
+                  })),
         ],
       ),
     );
+  }
+
+  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
+    return null;
   }
 }
