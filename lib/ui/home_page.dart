@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
           "https://api.giphy.com/v1/gifs/trending?api_key=BPSF8x3gOxlbQZ1eig9sqROD8PGjn3bd&limit=20&rating=g"));
     } else {
       response = await http.get(Uri.parse(
-          "https://api.giphy.com/v1/gifs/search?api_key=BPSF8x3gOxlbQZ1eig9sqROD8PGjn3bd&q=$_search&limit=20&offset=$_offset&rating=g&lang=en"));
+          "https://api.giphy.com/v1/gifs/search?api_key=BPSF8x3gOxlbQZ1eig9sqROD8PGjn3bd&q=$_search&limit=19&offset=$_offset&rating=g&lang=en"));
     }
     return json.decode(response.body);
   }
@@ -51,12 +51,19 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: EdgeInsets.all(10),
             child: TextField(
-              decoration: InputDecoration(
+              onSubmitted: (text) {
+                setState(() {
+                  _search = text;
+                  // Resetar ao psq, caso contrario nao mostra os primeiros itens da nova pesquisa
+                  _offset = 0;
+                });
+              },
+              decoration: const InputDecoration(
                 labelText: "Pesquise aqui",
                 labelStyle: TextStyle(color: Colors.white),
                 border: OutlineInputBorder(),
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
               ),
@@ -92,6 +99,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  int _getCount(List data) {
+    if (_search == null) {
+      return data.length;
+    } else {
+      return data.length + 1;
+    }
+  }
+
   Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
     return GridView.builder(
       padding: EdgeInsets.all(10),
@@ -101,17 +116,36 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 10, //Espaço Horizontal entre os itens
         mainAxisSpacing: 10, // Espaço Vertical entre os itens
       ),
-      itemCount: snapshot.data['data'].length,
+      itemCount: _getCount(snapshot.data['data']),
       // Func que cria cada item do grid
       itemBuilder: (context, index) {
-        //Permite clicar no item
-        return GestureDetector(
-          child: Image.network(
-            snapshot.data['data'][index]['images']['fixed_height']['url'],
-            height: 300,
-            fit: BoxFit.cover,
-          ),
-        );
+        if (_search == null || index < snapshot.data['data'].length)
+          //Permite clicar no item
+          return GestureDetector(
+            child: Image.network(
+              snapshot.data['data'][index]['images']['fixed_height']['url'],
+              height: 300,
+              fit: BoxFit.cover,
+            ),
+          );
+        else
+          return Container(
+            child: GestureDetector(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.add, color: Colors.white, size: 70),
+                  Text("Carregar mais ...",
+                      style: TextStyle(color: Colors.white, fontSize: 22))
+                ],
+              ),
+              onTap: () {
+                setState(() {
+                  _offset += 19;
+                });
+              },
+            ),
+          );
       },
     );
   }
